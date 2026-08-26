@@ -29,9 +29,9 @@ def stereoCalibrate(camL_geometry, camH_geometry, obslist, distortionActive=Fals
                 rv=sm.RotationVector()
                 r.append(rv.rotationMatrixToParameters( baseline.C() ))
         
-        r_median = np.median(np.asmatrix(r), axis=0).flatten().T
+        r_median = np.median(np.vstack(r), axis=0).reshape((-1, 1))
         R_median = rv.parametersToRotationMatrix(r_median)
-        t_median = np.median(np.asmatrix(t), axis=0).flatten().T
+        t_median = np.median(np.vstack(t), axis=0).reshape((-1, 1))
         
         baseline_HL = sm.Transformation( sm.rt2Transform(R_median, t_median) )
     else:

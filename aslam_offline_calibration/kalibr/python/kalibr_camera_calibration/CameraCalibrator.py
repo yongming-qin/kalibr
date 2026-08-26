@@ -1,4 +1,5 @@
 from __future__ import print_function #handle print in 2.x python
+import os
 import sm
 from sm import PlotCollection
 from kalibr_common import ConfigReader as cr
@@ -65,10 +66,16 @@ class CameraGeometry(object):
             if not success:
                 sm.logError("initialization of intrinsics for cam with topic {0} failed  ".format(self.dataset.topic))
         
-        #optimize for intrinsics & distortion    
-        success = kcc.calibrateIntrinsics(self, observations)
-        if not success:
-            sm.logError("initialization of intrinsics for cam with topic {0} failed  ".format(self.dataset.topic))
+        skip_initial_intrinsics = self.dataset.topic in {
+            topic for topic in os.environ.get(
+                "KALIBR_SKIP_INITIAL_INTRINSICS_OPTIMIZATION_TOPICS", ""
+            ).split(",") if topic
+        }
+        if not skip_initial_intrinsics:
+            # optimize for intrinsics & distortion
+            success = kcc.calibrateIntrinsics(self, observations)
+            if not success:
+                sm.logError("initialization of intrinsics for cam with topic {0} failed  ".format(self.dataset.topic))
         
         self.isGeometryInitialized = success        
         return success
